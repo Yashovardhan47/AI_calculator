@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnicalc.local/schemas/calcgraph-0.1.0.json",
+  "title": "CalcGraph",
+  "description": "Versioned typed calculation intermediate representation.",
+  "type": "object",
+  "required": ["version", "goal", "calculator", "nodes", "output_node_ids", "provenance"],
+  "properties": {
+    "graph_id": {"type": "string", "format": "uuid"},
+    "version": {"const": "0.1.0"},
+    "goal": {"type": "string", "minLength": 1},
+    "calculator": {"enum": ["arithmetic", "age", "emi", "statistics", "units"]},
+    "status": {"enum": ["compiled", "verified", "executed", "rejected"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "output_node_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "constraints": {"type": "array", "items": {"$ref": "#/$defs/constraint"}},
+    "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "kind", "semantic_type", "inputs", "metadata"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
+        "label": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["input", "operation"]},
+        "semantic_type": {"type": "string", "minLength": 1},
+        "unit": {"type": ["string", "null"]},
+        "value": {},
+        "operation": {"type": ["string", "null"]},
+        "inputs": {"type": "object", "additionalProperties": {"type": "string"}},
+        "metadata": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["expression", "description", "severity"],
+      "properties": {
+        "expression": {"type": "string"},
+        "description": {"type": "string"},
+        "severity": {"enum": ["error", "warning"]}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["formula_id", "version", "operation", "equation", "source"],
+      "properties": {
+        "formula_id": {"type": "string"},
+        "version": {"type": "string"},
+        "operation": {"type": "string"},
+        "equation": {"type": "string"},
+        "source": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

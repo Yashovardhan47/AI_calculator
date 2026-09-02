@@ -1,3 +1,6 @@
+import CalcGraphPanel from "./CalcGraphPanel";
+
+
 export default function ResultPanel({ result, error, loading }) {
   if (loading) {
     return (
@@ -65,7 +68,8 @@ export default function ResultPanel({ result, error, loading }) {
           {result.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}
         </ul>
       </div>
+
+      <CalcGraphPanel graph={result.calcgraph} receipt={result.receipt} verification={result.verification} />
     </section>
   );
 }
-

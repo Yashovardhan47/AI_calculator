@@ -1,0 +1,68 @@
+[
+  {
+    "id": "arithmetic-precedence",
+    "query": "Calculate (18 + 6) * 4 / 3",
+    "expected": {"calculator": "arithmetic", "value": 32.0}
+  },
+  {
+    "id": "arithmetic-power",
+    "query": "Calculate 2^10 + 5",
+    "expected": {"calculator": "arithmetic", "value": 1029}
+  },
+  {
+    "id": "age-fixed-dates",
+    "query": "Calculate age from 2003-08-15 to 2026-09-02",
+    "expected": {"calculator": "age", "value": 8419}
+  },
+  {
+    "id": "emi-five-years",
+    "query": "EMI for ₹10 lakh at 8.5% for 5 years",
+    "expected": {"calculator": "emi", "value": 20516.53, "tolerance": 0.02}
+  },
+  {
+    "id": "emi-zero-rate",
+    "query": "EMI for INR 120000 at 0% for 12 months",
+    "expected": {"calculator": "emi", "value": 10000.0}
+  },
+  {
+    "id": "statistics-summary",
+    "query": "Find mean, median and standard deviation of 12, 15, 18, 21",
+    "expected": {"calculator": "statistics", "value": 16.5}
+  },
+  {
+    "id": "statistics-negative-values",
+    "query": "Mean of -4, -2, 2, 4",
+    "expected": {"calculator": "statistics", "value": 0.0}
+  },
+  {
+    "id": "length-conversion",
+    "query": "Convert 15 kilometres to miles",
+    "expected": {"calculator": "units", "value": 9.3205678836, "tolerance": 1e-10}
+  },
+  {
+    "id": "temperature-conversion",
+    "query": "Convert 32 fahrenheit to celsius",
+    "expected": {"calculator": "units", "value": 0.0}
+  },
+  {
+    "id": "mass-conversion",
+    "query": "Convert 5 kg to pounds",
+    "expected": {"calculator": "units", "value": 11.0231131092, "tolerance": 1e-10}
+  },
+  {
+    "id": "clarify-incomplete-emi",
+    "query": "Calculate my loan EMI",
+    "expected": {"outcome": "clarification"}
+  },
+  {
+    "id": "reject-dimension-error",
+    "query": "Convert 5 kg to miles",
+    "expected": {"outcome": "invalid_graph"}
+  },
+  {
+    "id": "reject-code-expression",
+    "query": "__import__('os').system('echo unsafe')",
+    "calculator": "arithmetic",
+    "expected": {"outcome": "execution_error"}
+  }
+]

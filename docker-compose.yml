@@ -10,6 +10,7 @@ services:
     volumes:
       - omnicalc_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./database/002_calcgraph.sql:/docker-entrypoint-initdb.d/002-calcgraph.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U omnicalc -d omnicalc"]
       interval: 5s
@@ -41,4 +42,3 @@ services:
 
 volumes:
   omnicalc_data:
-

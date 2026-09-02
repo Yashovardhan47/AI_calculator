@@ -24,6 +24,13 @@ class CalculationResult(BaseModel):
     assumptions: list[str]
     confidence: float = Field(ge=0, le=1)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    calcgraph: dict[str, Any]
+    verification: dict[str, Any]
+    receipt: dict[str, Any]
+
+
+class CalcGraphPayload(BaseModel):
+    graph: dict[str, Any]
 
 
 class CalculatorInfo(BaseModel):
@@ -31,4 +38,3 @@ class CalculatorInfo(BaseModel):
     name: str
     description: str
     examples: list[str]
-

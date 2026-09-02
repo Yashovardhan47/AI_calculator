@@ -10,9 +10,9 @@ export async function calculate(query, calculator) {
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     const detail = data?.detail;
-    const message = typeof detail === "string" ? detail : detail?.message;
+    const questions = Array.isArray(detail?.questions) ? detail.questions.join(" ") : "";
+    const message = typeof detail === "string" ? detail : questions || detail?.message;
     throw new Error(message || "The calculation could not be completed.");
   }
   return data;
 }
-

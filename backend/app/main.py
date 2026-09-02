@@ -3,9 +3,18 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from .calculator import CALCULATORS, CalculationError, calculate
+from .calculator import CALCULATORS
+from .calcgraph import (
+    CalcGraph,
+    ClarificationNeeded,
+    GraphVerificationError,
+    compile_query,
+    execute_graph,
+    verify_graph,
+)
+from .calcgraph.service import calculate_with_graph
 from .config import settings
-from .schemas import CalculationRequest, CalculationResult, CalculatorInfo
+from .schemas import CalcGraphPayload, CalculationRequest, CalculationResult, CalculatorInfo
 from .services.ai_router import route_with_openai
 
 
@@ -33,6 +42,16 @@ def list_calculators() -> list[dict]:
     return CALCULATORS
 
 
+def _calculation_error(exc: Exception, calculator: str | None = None) -> HTTPException:
+    detail: dict = {"message": str(exc), "calculator": calculator}
+    if isinstance(exc, ClarificationNeeded):
+        detail["calculator"] = exc.calculator
+        detail["questions"] = exc.questions
+    if isinstance(exc, GraphVerificationError):
+        detail["verification"] = exc.report.to_dict()
+    return HTTPException(status_code=422, detail=detail)
+
+
 @app.post("/api/v1/calculate", response_model=CalculationResult)
 async def run_calculation(payload: CalculationRequest) -> dict:
     query = payload.query
@@ -49,12 +68,36 @@ async def run_calculation(payload: CalculationRequest) -> dict:
             routing_source = "local_fallback"
 
     try:
-        result = calculate(query, hint)
-    except CalculationError as exc:
-        raise HTTPException(
-            status_code=422,
-            detail={"message": str(exc), "calculator": exc.calculator},
-        ) from exc
+        result = calculate_with_graph(query, hint)
+    except (ClarificationNeeded, GraphVerificationError, SyntaxError, TypeError, ValueError, ZeroDivisionError, OverflowError) as exc:
+        raise _calculation_error(exc, hint) from exc
 
     result["metadata"]["routing_source"] = routing_source
     return result
+
+
+@app.post("/api/v1/calcgraph/compile")
+def compile_calcgraph(payload: CalculationRequest) -> dict:
+    try:
+        graph = compile_query(payload.query, payload.calculator)
+    except (ClarificationNeeded, SyntaxError, TypeError, ValueError) as exc:
+        raise _calculation_error(exc, payload.calculator) from exc
+    return {"calcgraph": graph.to_dict(), "graph_fingerprint": graph.fingerprint()}
+
+
+@app.post("/api/v1/calcgraph/verify")
+def verify_calcgraph(payload: CalcGraphPayload) -> dict:
+    try:
+        graph = CalcGraph.from_dict(payload.graph)
+        return verify_graph(graph).to_dict()
+    except (TypeError, KeyError, ValueError) as exc:
+        raise _calculation_error(exc) from exc
+
+
+@app.post("/api/v1/calcgraph/execute")
+def execute_calcgraph(payload: CalcGraphPayload) -> dict:
+    try:
+        graph = CalcGraph.from_dict(payload.graph)
+        return execute_graph(graph)
+    except (GraphVerificationError, SyntaxError, TypeError, KeyError, ValueError, ZeroDivisionError, OverflowError) as exc:
+        raise _calculation_error(exc, getattr(graph, "calculator", None) if "graph" in locals() else None) from exc
