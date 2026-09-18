@@ -23,6 +23,30 @@ FORMULA_REGISTRY = {
         "output": "MoneyPerMonth",
         "source": "Standard reducing-balance loan amortization formula",
     },
+    "finance.total_payment": {
+        "formula_id": "finance.loan.total_payment.v1",
+        "version": "1.0.0",
+        "equation": "total payment = monthly payment × number of monthly payments",
+        "inputs": {"monthly_payment": "MoneyPerMonth", "tenure": "Duration"},
+        "output": "Money",
+        "source": "Deterministic loan cash-flow aggregation",
+    },
+    "finance.total_interest": {
+        "formula_id": "finance.loan.total_interest.v1",
+        "version": "1.0.0",
+        "equation": "total interest = total payment − principal",
+        "inputs": {"total_payment": "Money", "principal": "Money"},
+        "output": "Money",
+        "source": "Deterministic loan cash-flow decomposition",
+    },
+    "finance.interest_share": {
+        "formula_id": "finance.loan.interest_share.v1",
+        "version": "1.0.0",
+        "equation": "interest share = total interest ÷ total payment × 100",
+        "inputs": {"total_interest": "Money", "total_payment": "Money"},
+        "output": "Percentage",
+        "source": "Deterministic proportional analysis",
+    },
     "statistics.summary": {
         "formula_id": "statistics.descriptive.population.v1",
         "version": "1.0.0",
@@ -51,4 +75,3 @@ def formula_provenance(operation: str) -> dict:
         "equation": formula["equation"],
         "source": formula["source"],
     }
-

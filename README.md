@@ -1,92 +1,88 @@
 # OmniCalc + CalcGraph
 
-OmniCalc is a natural-language calculation workspace. The CalcGraph research contribution adds a typed, inspectable calculation intermediate representation between user intent and deterministic execution. Every accepted request now returns the result, graph, static-verification report, formula provenance, and a downloadable evidence receipt.
+OmniCalc is a deployable AI-assisted calculation workspace. A user describes a goal in natural language; CalcGraph compiles it into a typed calculation graph, verifies the graph, executes only allowlisted deterministic formulas, and returns a result with provenance and a reproducibility receipt.
 
-The original CodeAlpha Age Calculator files remain in the repository for history. The new application lives in separate `frontend`, `backend`, `database`, and `api_keys` folders.
+This production branch includes email/password authentication, Google Identity Services sign-in, short-lived JWT access tokens, rotating refresh sessions, PostgreSQL-backed user data, synchronized calculation history, and reusable workflows.
 
-## First implemented calculation families
+## What is implemented
 
 - Safe arithmetic expressions
-- Exact age and date differences
-- Loan EMI and total-interest calculations
+- Exact age and calendar differences
+- Loan EMI, total payment, total interest, and interest-share graphs
 - Mean, median, population standard deviation, minimum, and maximum
-- Unit and temperature conversion
+- Length, mass, and temperature conversion
+- CalcGraph typed IR, static verification, versioned formula registry, deterministic execution, and evidence receipts
+- Local registration/login plus server-verified Google sign-in
+- Account-scoped history and saved workflows
+- Docker development and production stacks plus CI
 
-The deterministic engine performs every numerical operation. If `OPENAI_API_KEY` is configured, AI is used only to route and normalize natural-language requests; it cannot add operations, bypass graph verification, or provide the accepted numeric result. An automatic local router keeps the application functional without a paid key.
+AI is optional. When `OPENAI_API_KEY` is configured, it only routes and normalizes a request. It cannot add executable operations, bypass graph verification, or supply the accepted number. The local router keeps the application functional without a paid AI key.
 
-## CalcGraph research pipeline
-
-```text
-Natural-language goal
-        ↓
-Typed CalcGraph compiler
-        ↓
-Static verifier (operation, signature, type, edge, DAG, finite value, dimension)
-        ↓
-Allowlisted deterministic executor
-        ↓
-Result + formula provenance + reproducibility receipt
-```
-
-The current research prototype integrates five domain packs. It is deliberately honest about scope: the contribution is a verifiable cross-domain calculation protocol, not a claim that every calculation in the world is already implemented.
-
-## Project structure
+## Repository structure
 
 ```text
-frontend/                 React + Vite calculation workspace
-backend/                  FastAPI API and verified Python calculation engine
-  app/calculator/modules/ Independent domain calculators
-  app/calcgraph/          Typed IR, compiler, verifier, executor, and receipts
-  app/services/           Optional AI intent routing
-  tests/                  Engine tests
-database/                 PostgreSQL schema and database notes
-api_keys/                 Secret-management and provider documentation
-docs/                     Architecture and API documentation
-research/                 Research claim, experiment plan, and benchmark
+frontend/                 React + Vite authenticated workspace
+backend/                  FastAPI, authentication, CalcGraph, calculators
+  app/auth/               Google verification and JWT session lifecycle
+  app/calculator/modules/ Deterministic domain calculators
+  app/calcgraph/          IR, compiler, type system, verifier, executor
+  app/routers/            Account-scoped workspace endpoints
+  tests/                  API, auth, graph, and calculator tests
+database/                 PostgreSQL schema and migrations
+api_keys/                 Configuration and secret-handling guide
+docs/                     Architecture, authentication, API, deployment
+research/                 Claim, experiment plan, benchmark, metrics
 ```
 
-## Run with Docker
+## Start locally
 
 1. Copy `.env.example` to `.env`.
-2. Leave `OPENAI_API_KEY` blank for local deterministic routing, or add your key.
-3. Run `docker compose up --build`.
-4. Open `http://localhost:5173`.
+2. Generate `JWT_SECRET` using the command shown in `.env.example`.
+3. Add a Google OAuth Web Client ID to both `GOOGLE_CLIENT_ID` and `VITE_GOOGLE_CLIENT_ID`, or leave both blank while testing email/password auth.
+4. Run:
 
-The API documentation is available at `http://localhost:8000/docs`.
+```bash
+docker compose up --build
+```
 
-## Run without Docker
+Open `http://localhost:5173`. API documentation is at `http://localhost:8000/docs`.
 
-Backend:
+The Docker frontend uses its Nginx `/api` proxy by default. For separate Vite development, `.env.example` sets `VITE_API_BASE_URL=http://localhost:8000`.
+
+## Validate
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
+python -m unittest discover -s tests -v
+cd ..
+python research/run_benchmark.py
 
-Frontend:
-
-```bash
 cd frontend
-npm install
-npm run dev
+npm ci
+npm run build
 ```
 
-Research benchmark:
+## Production
+
+`compose.production.yml` fails fast unless PostgreSQL, a unique JWT secret, secure cookies, explicit origins, and Google client IDs are configured. Put HTTPS in front of the frontend container, then run:
 
 ```bash
-backend/.venv/bin/python research/run_benchmark.py
+docker compose -f compose.production.yml up -d --build
 ```
 
-## Security rules
+Read [Authentication](docs/AUTHENTICATION.md) and [Deployment](docs/DEPLOYMENT.md) before deploying. The [research folder](research/README.md) states the current contribution and its limits; it does not claim that every possible calculation is implemented.
 
-- Real API keys belong only in `.env`; never put them in frontend code or Git.
-- AI proposes a calculator route but never supplies the trusted numeric result.
-- Only versioned operations in the formula registry can execute.
-- Static verification rejects malformed edges, cycles, type errors, non-finite values, and incompatible unit dimensions.
-- Arithmetic is parsed with a restricted Python syntax tree; arbitrary code is not evaluated.
-- Live rates must retain their provider and retrieval timestamp when added.
+## Security invariants
 
-See `docs/ARCHITECTURE.md`, `docs/API.md`, `research/README.md`, and `api_keys/README.md` for details.
+- Passwords are salted and hashed with scrypt; plaintext passwords are never stored.
+- Google ID tokens are verified by the backend for signature, issuer, audience, expiry, stable subject, and verified email.
+- Access JWTs live in browser session storage and expire quickly.
+- Refresh JWTs live only in `HttpOnly` cookies; only SHA-256 token hashes are stored server-side and every refresh rotates the session.
+- Browser authentication requests are restricted to configured origins.
+- Production refuses the development JWT secret, in-memory persistence, insecure cookies, or wildcard origins.
+- Arbitrary Python or AI-generated code is never evaluated by the calculation engine.
+
+Never commit `.env` or real credentials. See [API keys and secrets](api_keys/README.md) and [Security](SECURITY.md).

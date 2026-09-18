@@ -48,6 +48,13 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.assertFalse(response.json()["detail"]["verification"]["valid"])
 
+    def test_type_registry_is_discoverable(self):
+        response = self.client.get("/api/v1/calcgraph/types")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["version"], "0.2.0")
+        self.assertTrue(any(item["name"] == "Money" for item in payload["types"]))
+
 
 if __name__ == "__main__":
     unittest.main()

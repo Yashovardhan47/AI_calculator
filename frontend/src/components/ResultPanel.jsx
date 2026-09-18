@@ -1,7 +1,7 @@
 import CalcGraphPanel from "./CalcGraphPanel";
 
 
-export default function ResultPanel({ result, error, loading }) {
+export default function ResultPanel({ result, error, loading, onSaveWorkflow, workflowState }) {
   if (loading) {
     return (
       <section className="result-panel result-loading" aria-live="polite">
@@ -48,6 +48,12 @@ export default function ResultPanel({ result, error, loading }) {
       <div className="answer-card">
         <span>Answer</span>
         <strong>{result.answer}</strong>
+      </div>
+
+      <div className="result-actions">
+        <button disabled={workflowState === "saving" || workflowState === "saved"} onClick={onSaveWorkflow} type="button">
+          {workflowState === "saving" ? "Saving…" : workflowState === "saved" ? "Saved to workflows ✓" : "Save as reusable workflow"}
+        </button>
       </div>
 
       <div className="result-section formula-box">

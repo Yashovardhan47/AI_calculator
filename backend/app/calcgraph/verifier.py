@@ -8,12 +8,18 @@ from app.calculator.modules import units
 
 from .formulas import FORMULA_REGISTRY, formula_provenance
 from .models import CALCGRAPH_VERSION, CalcGraph, CalcNode
+from .typesystem import TYPE_SYSTEM_VERSION, is_assignable, is_registered, value_matches
 
 
 CALCULATOR_OPERATIONS = {
     "arithmetic": {"arithmetic.evaluate"},
     "age": {"age.difference"},
-    "emi": {"finance.emi"},
+    "emi": {
+        "finance.emi",
+        "finance.total_payment",
+        "finance.total_interest",
+        "finance.interest_share",
+    },
     "statistics": {"statistics.summary"},
     "units": {"units.convert"},
 }
@@ -110,6 +116,11 @@ def verify_graph(graph: CalcGraph, raise_on_error: bool = False) -> Verification
         graph.version == CALCGRAPH_VERSION,
         f"Graph IR version must be {CALCGRAPH_VERSION}; received {graph.version}.",
     )
+    record(
+        "graph.type_system_version",
+        graph.type_system_version == TYPE_SYSTEM_VERSION,
+        f"Semantic type-system version must be {TYPE_SYSTEM_VERSION}; received {graph.type_system_version}.",
+    )
 
     node_ids = [node.id for node in graph.nodes]
     unique_ids = len(node_ids) == len(set(node_ids))
@@ -133,12 +144,30 @@ def verify_graph(graph: CalcGraph, raise_on_error: bool = False) -> Verification
             else f"Node '{node.id}' contains a non-finite numeric value.",
             node.id,
         )
+        semantic_type_valid = is_registered(node.semantic_type)
+        record(
+            "node.semantic_type_registered",
+            semantic_type_valid,
+            f"Node '{node.id}' uses registered semantic type '{node.semantic_type}'."
+            if semantic_type_valid
+            else f"Node '{node.id}' uses unknown semantic type '{node.semantic_type}'.",
+            node.id,
+        )
 
         if node.kind == "input":
             record(
                 "input.no_operation",
                 not node.operation and not node.inputs,
                 f"Input node '{node.id}' cannot declare an operation or dependencies.",
+                node.id,
+            )
+            value_type_valid = semantic_type_valid and value_matches(node.semantic_type, node.value)
+            record(
+                "input.value_type",
+                value_type_valid,
+                f"Input node '{node.id}' value conforms to semantic type '{node.semantic_type}'."
+                if value_type_valid
+                else f"Input node '{node.id}' value does not conform to semantic type '{node.semantic_type}'.",
                 node.id,
             )
             continue
@@ -218,7 +247,7 @@ def verify_graph(graph: CalcGraph, raise_on_error: bool = False) -> Verification
             )
             if exists and input_name in expected_inputs:
                 expected_type = expected_inputs[input_name]
-                type_valid = dependency.semantic_type == expected_type
+                type_valid = is_assignable(dependency.semantic_type, expected_type)
                 record(
                     "edge.semantic_type",
                     type_valid,
@@ -250,6 +279,17 @@ def verify_graph(graph: CalcGraph, raise_on_error: bool = False) -> Verification
         if operation_count_valid
         else "The graph does not contain an executable operation.",
     )
+
+    for index, constraint in enumerate(graph.constraints):
+        constraint_valid = bool(constraint.expression.strip()) and bool(constraint.description.strip())
+        severity_valid = constraint.severity in {"error", "warning"}
+        record(
+            "constraint.structure",
+            constraint_valid and severity_valid,
+            f"Constraint {index} has an expression, description, and supported severity."
+            if constraint_valid and severity_valid
+            else f"Constraint {index} is malformed.",
+        )
     outputs_valid = bool(graph.output_node_ids) and all(node_id in nodes for node_id in graph.output_node_ids)
     record(
         "graph.outputs",

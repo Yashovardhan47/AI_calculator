@@ -7,8 +7,10 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from .typesystem import TYPE_SYSTEM_VERSION
 
-CALCGRAPH_VERSION = "0.1.0"
+
+CALCGRAPH_VERSION = "0.2.0"
 
 
 @dataclass
@@ -52,6 +54,7 @@ class CalcGraph:
     provenance: list[dict[str, Any]] = field(default_factory=list)
     graph_id: str = field(default_factory=lambda: str(uuid4()))
     version: str = CALCGRAPH_VERSION
+    type_system_version: str = TYPE_SYSTEM_VERSION
     status: str = "compiled"
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
@@ -59,6 +62,7 @@ class CalcGraph:
         return {
             "graph_id": self.graph_id,
             "version": self.version,
+            "type_system_version": self.type_system_version,
             "goal": self.goal,
             "calculator": self.calculator,
             "status": self.status,
@@ -75,6 +79,7 @@ class CalcGraph:
         return cls(
             graph_id=payload.get("graph_id", str(uuid4())),
             version=payload.get("version", CALCGRAPH_VERSION),
+            type_system_version=payload.get("type_system_version", TYPE_SYSTEM_VERSION),
             goal=payload["goal"],
             calculator=payload["calculator"],
             status=payload.get("status", "compiled"),
@@ -94,6 +99,7 @@ class CalcGraph:
             nodes.append(item)
         return {
             "version": self.version,
+            "type_system_version": self.type_system_version,
             "goal": self.goal,
             "calculator": self.calculator,
             "nodes": nodes,
@@ -106,4 +112,3 @@ class CalcGraph:
     def fingerprint(self) -> str:
         canonical = json.dumps(self.reproducible_payload(), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-

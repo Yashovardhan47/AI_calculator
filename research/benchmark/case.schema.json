@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnicalc.local/schemas/calcgraphbench-case-0.2.0.json",
+  "title": "CalcGraphBench case",
+  "type": "object",
+  "required": ["id", "query", "expected"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "query": {"type": "string", "minLength": 1},
+    "calculator": {"type": "string"},
+    "domain": {"type": "string"},
+    "difficulty": {"enum": ["single_step", "multi_step", "ambiguous", "adversarial"]},
+    "source": {"enum": ["human", "template", "external"]},
+    "expected": {
+      "type": "object",
+      "properties": {
+        "outcome": {"enum": ["success", "clarification", "invalid_graph", "execution_error"]},
+        "calculator": {"type": "string"},
+        "value": {"type": "number"},
+        "output_values": {"type": "object", "additionalProperties": {"type": "number"}},
+        "tolerance": {"type": "number", "minimum": 0},
+        "operation_count": {"type": "integer", "minimum": 1},
+        "graph_depth": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

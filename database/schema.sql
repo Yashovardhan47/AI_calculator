@@ -2,11 +2,31 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(320) UNIQUE,
+    email VARCHAR(320) UNIQUE NOT NULL,
     display_name VARCHAR(120),
+    password_hash TEXT,
+    auth_provider VARCHAR(30) NOT NULL DEFAULT 'local' CHECK (auth_provider IN ('local', 'google', 'linked')),
+    google_sub VARCHAR(255) UNIQUE,
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    avatar_url TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
+    last_login_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash CHAR(64) NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_active
+    ON refresh_tokens (user_id, expires_at DESC) WHERE revoked_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS calculation_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

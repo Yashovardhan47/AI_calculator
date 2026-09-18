@@ -17,6 +17,16 @@ class ClarificationNeeded(ValueError):
         self.questions = questions
 
 
+def _extract_principal_value(query: str) -> float:
+    currency_pattern = r"(?:₹|rs\.?|inr)\s*([\d,]+(?:\.\d+)?)\s*(crores?|lakhs?|million|thousand|k)?"
+    loan_pattern = r"(?:loan|principal)\s*(?:amount\s*)?(?:of|is|=)?\s*(?:₹|rs\.?|inr)?\s*([\d,]+(?:\.\d+)?)\s*(crores?|lakhs?|million|thousand|k)?"
+    match = re.search(currency_pattern, query, re.IGNORECASE) or re.search(loan_pattern, query, re.IGNORECASE)
+    if match:
+        multiplier = finance.AMOUNT_MULTIPLIERS[(match.group(2) or "").lower()]
+        return float(match.group(1).replace(",", "")) * multiplier
+    return finance._extract_principal(query)
+
+
 def _input(node_id: str, label: str, semantic_type: str, value, unit: str | None = None, **metadata) -> CalcNode:
     return CalcNode(
         id=node_id,
@@ -83,7 +93,7 @@ def _compile_age(query: str) -> CalcGraph:
 def _compile_emi(query: str) -> CalcGraph:
     questions = []
     try:
-        principal = finance._extract_principal(query)
+        principal = _extract_principal_value(query)
     except ValueError:
         principal = None
         questions.append("What is the loan principal and currency?")
@@ -101,27 +111,79 @@ def _compile_emi(query: str) -> CalcGraph:
     if questions:
         raise ClarificationNeeded("emi", questions)
 
-    operation = "finance.emi"
+    normalized = query.lower()
+    wants_interest_share = any(
+        phrase in normalized
+        for phrase in ("interest percentage", "interest share", "percentage is interest", "percentage of the payment")
+    )
+    wants_total_interest = wants_interest_share or any(
+        phrase in normalized for phrase in ("total interest", "interest amount", "interest paid")
+    )
+    wants_total_payment = wants_total_interest or any(
+        phrase in normalized for phrase in ("total payment", "total amount", "total repayment")
+    )
+
+    operations = ["finance.emi"]
     nodes = [
         _input("principal", "Loan principal", "Money", principal, unit="INR"),
         _input("annual_rate", "Annual interest rate", "Rate", annual_rate, unit="percent/year"),
         _input("tenure", "Loan tenure", "Duration", months, unit="month"),
         _operation(
-            "result",
+            "emi",
             "Monthly payment",
             "MoneyPerMonth",
-            operation,
+            "finance.emi",
             {"principal": "principal", "annual_rate": "annual_rate", "tenure": "tenure"},
             unit="INR/month",
         ),
     ]
+    output_node_ids = ["emi"]
+    if wants_total_payment:
+        operations.append("finance.total_payment")
+        nodes.append(
+            _operation(
+                "total_payment",
+                "Total loan payment",
+                "Money",
+                "finance.total_payment",
+                {"monthly_payment": "emi", "tenure": "tenure"},
+                unit="INR",
+            )
+        )
+        output_node_ids.append("total_payment")
+    if wants_total_interest:
+        operations.append("finance.total_interest")
+        nodes.append(
+            _operation(
+                "total_interest",
+                "Total loan interest",
+                "Money",
+                "finance.total_interest",
+                {"total_payment": "total_payment", "principal": "principal"},
+                unit="INR",
+            )
+        )
+        output_node_ids.append("total_interest")
+    if wants_interest_share:
+        operations.append("finance.interest_share")
+        nodes.append(
+            _operation(
+                "interest_share",
+                "Interest share of repayment",
+                "Percentage",
+                "finance.interest_share",
+                {"total_interest": "total_interest", "total_payment": "total_payment"},
+                unit="percent",
+            )
+        )
+        output_node_ids.append("interest_share")
     return CalcGraph(
         query,
         "emi",
         nodes,
-        ["result"],
+        output_node_ids,
         assumptions=["The rate is fixed and payments occur monthly without fees or prepayments."],
-        provenance=[formula_provenance(operation)],
+        provenance=[formula_provenance(operation) for operation in operations],
     )
 
 
@@ -187,4 +249,3 @@ def compile_query(query: str, calculator_hint: str | None = None) -> CalcGraph:
     if compiler is None:
         raise ClarificationNeeded(calculator, ["That domain pack is not registered yet."])
     return compiler(normalized)
-

@@ -1,21 +1,27 @@
 import httpx
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .calculator import CALCULATORS
+from .auth.dependencies import optional_user
+from .auth.router import router as auth_router
 from .calcgraph import (
     CalcGraph,
     ClarificationNeeded,
     GraphVerificationError,
     compile_query,
     execute_graph,
+    registry_payload,
     verify_graph,
 )
 from .calcgraph.service import calculate_with_graph
 from .config import settings
 from .schemas import CalcGraphPayload, CalculationRequest, CalculationResult, CalculatorInfo
+from .routers.workspace import router as workspace_router
 from .services.ai_router import route_with_openai
+from .storage import get_store
 
 
 app = FastAPI(
@@ -27,19 +33,32 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+app.include_router(auth_router)
+app.include_router(workspace_router)
 
 
 @app.get("/api/v1/health")
 def health() -> dict:
-    return {"status": "ok", "version": settings.app_version, "ai_router_enabled": bool(settings.openai_api_key)}
+    return {
+        "status": "ok",
+        "version": settings.app_version,
+        "ai_router_enabled": bool(settings.openai_api_key),
+        "google_auth_enabled": bool(settings.google_client_id),
+        "persistence": get_store().mode,
+    }
 
 
 @app.get("/api/v1/calculators", response_model=list[CalculatorInfo])
 def list_calculators() -> list[dict]:
     return CALCULATORS
+
+
+@app.get("/api/v1/calcgraph/types")
+def list_calcgraph_types() -> dict:
+    return registry_payload()
 
 
 def _calculation_error(exc: Exception, calculator: str | None = None) -> HTTPException:
@@ -53,7 +72,10 @@ def _calculation_error(exc: Exception, calculator: str | None = None) -> HTTPExc
 
 
 @app.post("/api/v1/calculate", response_model=CalculationResult)
-async def run_calculation(payload: CalculationRequest) -> dict:
+async def run_calculation(
+    payload: CalculationRequest,
+    user: Annotated[dict | None, Depends(optional_user)],
+) -> dict:
     query = payload.query
     hint = payload.calculator
     routing_source = "client_hint" if hint else "local"
@@ -73,6 +95,9 @@ async def run_calculation(payload: CalculationRequest) -> dict:
         raise _calculation_error(exc, hint) from exc
 
     result["metadata"]["routing_source"] = routing_source
+    if user:
+        history_id = get_store().save_calculation(str(user["id"]), result)
+        result["metadata"]["history_id"] = history_id
     return result
 
 

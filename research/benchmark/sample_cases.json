@@ -64,5 +64,75 @@
     "query": "__import__('os').system('echo unsafe')",
     "calculator": "arithmetic",
     "expected": {"outcome": "execution_error"}
+  },
+  {
+    "id": "finance-depth-two-total-payment",
+    "query": "Calculate the EMI and total payment for a loan of INR 500000 at 5.5% for 36 months",
+    "domain": "finance",
+    "difficulty": "multi_step",
+    "source": "human",
+    "expected": {
+      "outcome": "success",
+      "calculator": "emi",
+      "output_values": {"emi": 15097.95, "total_payment": 543526.23},
+      "tolerance": 0.02,
+      "operation_count": 2,
+      "graph_depth": 2
+    }
+  },
+  {
+    "id": "finance-depth-three-total-interest",
+    "query": "Calculate the EMI, total payment, and total interest for a loan of INR 1000000 at 8.5% for 5 years",
+    "domain": "finance",
+    "difficulty": "multi_step",
+    "source": "human",
+    "expected": {
+      "outcome": "success",
+      "calculator": "emi",
+      "output_values": {"emi": 20516.53, "total_payment": 1230991.88, "total_interest": 230991.88},
+      "tolerance": 0.02,
+      "operation_count": 3,
+      "graph_depth": 3
+    }
+  },
+  {
+    "id": "finance-depth-four-interest-share",
+    "query": "Calculate the EMI, total payment, total interest, and interest percentage for a loan of INR 2500000 at 12% for 60 months",
+    "domain": "finance",
+    "difficulty": "multi_step",
+    "source": "human",
+    "expected": {
+      "outcome": "success",
+      "calculator": "emi",
+      "output_values": {
+        "emi": 55611.12,
+        "total_payment": 3336667.15,
+        "total_interest": 836667.15,
+        "interest_share": 25.0749
+      },
+      "tolerance": 0.02,
+      "operation_count": 4,
+      "graph_depth": 4
+    }
+  },
+  {
+    "id": "finance-zero-rate-chain",
+    "query": "Calculate the EMI, total payment, total interest, and interest percentage for a loan of INR 250000 at 0% for 12 months",
+    "domain": "finance",
+    "difficulty": "multi_step",
+    "source": "human",
+    "expected": {
+      "outcome": "success",
+      "calculator": "emi",
+      "output_values": {
+        "emi": 20833.33,
+        "total_payment": 250000.0,
+        "total_interest": 0.0,
+        "interest_share": 0.0
+      },
+      "tolerance": 0.02,
+      "operation_count": 4,
+      "graph_depth": 4
+    }
   }
 ]

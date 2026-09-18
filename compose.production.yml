@@ -1,39 +1,41 @@
 services:
   database:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: omnicalc
       POSTGRES_USER: omnicalc
-      POSTGRES_PASSWORD: omnicalc
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
     volumes:
-      - omnicalc_data:/var/lib/postgresql/data
+      - omnicalc_production_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
       - ./database/002_calcgraph.sql:/docker-entrypoint-initdb.d/002-calcgraph.sql:ro
       - ./database/003_auth.sql:/docker-entrypoint-initdb.d/003-auth.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U omnicalc -d omnicalc"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
 
   backend:
     build: ./backend
+    restart: unless-stopped
     environment:
-      APP_ENV: development
-      DATABASE_URL: postgresql://omnicalc:omnicalc@database:5432/omnicalc
+      APP_ENV: production
+      DATABASE_URL: postgresql://omnicalc:${POSTGRES_PASSWORD}@database:5432/omnicalc
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-mini}
-      JWT_SECRET: ${JWT_SECRET:-development-only-change-this-secret-32-chars}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER:-omnicalc-api}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-omnicalc-web}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-15}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-30}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+      COOKIE_SECURE: "true"
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
-    ports:
-      - "8000:8000"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?Set ALLOWED_ORIGINS to the HTTPS application origin}
+    expose:
+      - "8000"
     depends_on:
       database:
         condition: service_healthy
@@ -42,12 +44,13 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+        VITE_API_BASE_URL: ""
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:?Set VITE_GOOGLE_CLIENT_ID}
+    restart: unless-stopped
     ports:
-      - "5173:80"
+      - "${PORT:-80}:80"
     depends_on:
       - backend
 
 volumes:
-  omnicalc_data:
+  omnicalc_production_data:

@@ -1,13 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://omnicalc.local/schemas/calcgraph-0.1.0.json",
+  "$id": "https://omnicalc.local/schemas/calcgraph-0.2.0.json",
   "title": "CalcGraph",
   "description": "Versioned typed calculation intermediate representation.",
   "type": "object",
-  "required": ["version", "goal", "calculator", "nodes", "output_node_ids", "provenance"],
+  "required": ["version", "type_system_version", "goal", "calculator", "nodes", "output_node_ids", "provenance"],
   "properties": {
     "graph_id": {"type": "string", "format": "uuid"},
-    "version": {"const": "0.1.0"},
+    "version": {"const": "0.2.0"},
+    "type_system_version": {"const": "0.2.0"},
     "goal": {"type": "string", "minLength": 1},
     "calculator": {"enum": ["arithmetic", "age", "emi", "statistics", "units"]},
     "status": {"enum": ["compiled", "verified", "executed", "rejected"]},

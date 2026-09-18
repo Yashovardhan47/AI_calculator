@@ -27,6 +27,7 @@ class CalculationResult(BaseModel):
     calcgraph: dict[str, Any]
     verification: dict[str, Any]
     receipt: dict[str, Any]
+    node_results: dict[str, Any] = Field(default_factory=dict)
 
 
 class CalcGraphPayload(BaseModel):
