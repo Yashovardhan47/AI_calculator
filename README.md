@@ -47,7 +47,7 @@ docker compose up --build
 
 Open `http://localhost:5173`. API documentation is at `http://localhost:8000/docs`.
 
-The Docker frontend uses its Nginx `/api` proxy by default. For separate Vite development, `.env.example` sets `VITE_API_BASE_URL=http://localhost:8000`.
+The Docker frontend uses its Nginx `/api` proxy by default. For a separate Vite development server, create `frontend/.env.local` containing `VITE_API_BASE_URL=http://localhost:8000`.
 
 ## Validate
 
