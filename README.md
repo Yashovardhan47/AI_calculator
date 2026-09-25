@@ -11,6 +11,8 @@ This production branch includes email/password authentication, Google Identity S
 - Loan EMI, total payment, total interest, and interest-share graphs
 - Mean, median, population standard deviation, minimum, and maximum
 - Length, mass, and temperature conversion
+- Linear and quadratic algebra, common geometry formulas, simple and compound interest, discounts
+- Factorials, GCD, LCM, permutations, combinations, BMI, average speed, and degree-mode trigonometry
 - CalcGraph typed IR, static verification, versioned formula registry, deterministic execution, and evidence receipts
 - Local registration/login plus server-verified Google sign-in
 - Account-scoped history and saved workflows

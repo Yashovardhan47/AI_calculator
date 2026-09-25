@@ -4,6 +4,7 @@ const ICONS = {
   emi: "₹",
   statistics: "σ",
   units: "⇄",
+  advanced: "⌘",
 };
 
 export default function CategoryRail({ calculators, selected, onSelect }) {
@@ -41,4 +42,3 @@ export default function CategoryRail({ calculators, selected, onSelect }) {
     </aside>
   );
 }
-

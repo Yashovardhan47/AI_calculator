@@ -39,6 +39,7 @@ TYPE_REGISTRY = {
         SemanticTypeDefinition("Vector", "Any", "One-dimensional numeric vector.", "number_series"),
         SemanticTypeDefinition("Matrix", "Any", "Two-dimensional numeric matrix.", "matrix"),
         SemanticTypeDefinition("StatisticsSummary", "Any", "Structured descriptive-statistics result.", "object"),
+        SemanticTypeDefinition("CalculationResult", "Any", "Structured result from an allowlisted deterministic domain formula.", "object"),
         SemanticTypeDefinition("Comparison", "Any", "Structured comparison between alternatives.", "object"),
         SemanticTypeDefinition("Interval", "Any", "Closed numeric interval.", "object"),
         SemanticTypeDefinition("UncertainQuantity", "Any", "Value paired with uncertainty information.", "object"),

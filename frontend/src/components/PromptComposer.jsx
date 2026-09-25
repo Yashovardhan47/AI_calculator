@@ -12,7 +12,7 @@ export default function PromptComposer({ query, onQueryChange, onSubmit, loading
             id="calculation-query"
             maxLength={2000}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Try: EMI for ₹10 lakh at 8.5% for 5 years"
+            placeholder="Try: standard deviation of 12, 18, 21, 23 and 31"
             rows={4}
             value={query}
           />
@@ -35,4 +35,3 @@ export default function PromptComposer({ query, onQueryChange, onSubmit, loading
     </section>
   );
 }
-

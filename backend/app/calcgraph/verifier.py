@@ -22,6 +22,7 @@ CALCULATOR_OPERATIONS = {
     },
     "statistics": {"statistics.summary"},
     "units": {"units.convert"},
+    "advanced": {"advanced.evaluate"},
 }
 
 

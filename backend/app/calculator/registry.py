@@ -29,5 +29,14 @@ CALCULATORS = [
         "description": "Convert compatible length, mass, volume, and temperature units.",
         "examples": ["Convert 15 kilometres to miles", "Convert 98.6 F to C"],
     },
+    {
+        "id": "advanced",
+        "name": "Advanced domains",
+        "description": "Algebra, geometry, interest, number theory, combinatorics, BMI, physics, and degree-mode trigonometry.",
+        "examples": [
+            "Solve 3x + 7 = 25",
+            "Area of a circle with radius 12",
+            "Calculate compound interest on 100000 at 8% for 5 years",
+        ],
+    },
 ]
-

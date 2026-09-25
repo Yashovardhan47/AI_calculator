@@ -14,12 +14,15 @@ const CALCULATORS = [
   { id: "emi", name: "Loan EMI", description: "Payments and interest", examples: ["EMI for ₹10 lakh at 8.5% for 5 years"] },
   { id: "statistics", name: "Statistics", description: "Describe numeric datasets", examples: ["Find mean, median and standard deviation of 12, 15, 18, 21"] },
   { id: "units", name: "Unit conversion", description: "Units and dimensions", examples: ["Convert 15 kilometres to miles"] },
+  { id: "advanced", name: "Advanced", description: "Algebra, geometry, science & more", examples: ["Solve 3x + 7 = 25", "Area of a circle with radius 12", "Calculate compound interest on 100000 at 8% for 5 years"] },
 ];
 
 const DEFAULT_EXAMPLES = [
   "EMI for ₹10 lakh at 8.5% for 5 years",
   "Convert 15 kilometres to miles",
-  "Mean of 12, 15, 18, 21",
+  "Standard deviation of 12, 18, 21, 23 and 31",
+  "Solve 3x + 7 = 25",
+  "Area of a circle with radius 12",
 ];
 
 export default function App() {

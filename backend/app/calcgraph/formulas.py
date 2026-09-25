@@ -63,6 +63,14 @@ FORMULA_REGISTRY = {
         "output": "Quantity",
         "source": "International standard conversion factors in the unit registry",
     },
+    "advanced.evaluate": {
+        "formula_id": "omnicalc.advanced.allowlist.v1",
+        "version": "1.0.0",
+        "equation": "Select and execute one registered deterministic formula from the advanced domain pack",
+        "inputs": {"request": "Text"},
+        "output": "CalculationResult",
+        "source": "OmniCalc advanced formula registry",
+    },
 }
 
 

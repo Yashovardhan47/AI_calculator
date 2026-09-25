@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable
 from uuid import uuid4
 
-from app.calculator.modules import age, arithmetic, finance, statistics, units
+from app.calculator.modules import advanced, age, arithmetic, finance, statistics, units
 
 from .models import CalcGraph, CalcNode
 from .verifier import verify_graph
@@ -114,6 +114,11 @@ def _units(values: dict[str, Any], node: CalcNode) -> OperationOutcome:
     return result, result["value"]
 
 
+def _advanced(values: dict[str, Any], _: CalcNode) -> OperationOutcome:
+    result = advanced.calculate(str(values["request"]))
+    return result, result
+
+
 EXECUTORS: dict[str, Callable[[dict[str, Any], CalcNode], OperationOutcome]] = {
     "arithmetic.evaluate": _arithmetic,
     "age.difference": _age,
@@ -123,6 +128,7 @@ EXECUTORS: dict[str, Callable[[dict[str, Any], CalcNode], OperationOutcome]] = {
     "finance.interest_share": _interest_share,
     "statistics.summary": _statistics,
     "units.convert": _units,
+    "advanced.evaluate": _advanced,
 }
 
 

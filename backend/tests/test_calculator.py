@@ -33,6 +33,40 @@ class CalculatorEngineTests(unittest.TestCase):
         self.assertEqual(result["metadata"]["mean"], 16.5)
         self.assertEqual(result["metadata"]["median"], 16.5)
 
+    def test_statistics_accepts_natural_language_and_separator(self):
+        result = calculate("standard deviation of 12, 18, 21, 23 and 31")
+        self.assertEqual(result["calculator"], "statistics")
+        self.assertTrue(
+            math.isclose(
+                result["metadata"]["population_standard_deviation"],
+                6.2289646,
+                abs_tol=1e-7,
+            )
+        )
+
+    def test_linear_equation(self):
+        result = calculate("Solve 3x + 7 = 25")
+        self.assertEqual(result["calculator"], "advanced")
+        self.assertEqual(result["value"], 6)
+
+    def test_geometry(self):
+        result = calculate("Area of a circle with radius 12")
+        self.assertTrue(math.isclose(result["value"], math.pi * 144, rel_tol=1e-8))
+
+    def test_compound_interest(self):
+        result = calculate("Calculate compound interest on 100000 at 8% for 5 years")
+        self.assertEqual(result["unit"], "INR")
+        self.assertTrue(math.isclose(result["value"], 46932.80768, abs_tol=1e-5))
+
+    def test_number_theory_and_combinatorics(self):
+        self.assertEqual(calculate("factorial of 6")["value"], 720)
+        self.assertEqual(calculate("gcd of 48 and 18")["value"], 6)
+        self.assertEqual(calculate("combination 10 choose 3")["value"], 120)
+
+    def test_bmi_and_degree_trigonometry(self):
+        self.assertTrue(math.isclose(calculate("BMI weight 70 kg height 175 cm")["value"], 22.85714286))
+        self.assertTrue(math.isclose(calculate("sin 30 degrees")["value"], 0.5, abs_tol=1e-10))
+
     def test_unit_conversion(self):
         result = calculate("Convert 15 kilometres to miles")
         self.assertTrue(math.isclose(result["value"], 9.3205678836, rel_tol=1e-10))
@@ -44,4 +78,3 @@ class CalculatorEngineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

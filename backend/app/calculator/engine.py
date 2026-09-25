@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from .modules import age, arithmetic, finance, statistics, units
+from .modules import advanced, age, arithmetic, finance, statistics, units
 from .parser import detect_calculator
 
 
@@ -16,6 +16,7 @@ HANDLERS = {
     "emi": finance.calculate,
     "statistics": statistics.calculate,
     "units": units.calculate,
+    "advanced": advanced.calculate,
 }
 
 
@@ -38,4 +39,3 @@ def calculate(query: str, calculator_hint: str | None = None) -> dict:
         **result,
         "metadata": result.get("metadata", {}),
     }
-

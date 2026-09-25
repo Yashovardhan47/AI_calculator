@@ -231,12 +231,35 @@ def _compile_units(query: str) -> CalcGraph:
     return CalcGraph(query, "units", nodes, ["result"], provenance=[formula_provenance(operation)])
 
 
+def _compile_advanced(query: str) -> CalcGraph:
+    operation = "advanced.evaluate"
+    nodes = [
+        _input("request", "Advanced calculation request", "Text", query),
+        _operation(
+            "result",
+            "Verified advanced calculation",
+            "CalculationResult",
+            operation,
+            {"request": "request"},
+        ),
+    ]
+    return CalcGraph(
+        query,
+        "advanced",
+        nodes,
+        ["result"],
+        assumptions=["Only explicitly registered deterministic formulas may execute."],
+        provenance=[formula_provenance(operation)],
+    )
+
+
 COMPILERS = {
     "arithmetic": _compile_arithmetic,
     "age": _compile_age,
     "emi": _compile_emi,
     "statistics": _compile_statistics,
     "units": _compile_units,
+    "advanced": _compile_advanced,
 }
 
 

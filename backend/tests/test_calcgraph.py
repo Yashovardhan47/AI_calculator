@@ -121,6 +121,16 @@ class CalcGraphTests(unittest.TestCase):
         self.assertEqual(first["receipt"]["graph_fingerprint"], second["receipt"]["graph_fingerprint"])
         self.assertEqual(first["receipt"]["reproducibility_hash"], second["receipt"]["reproducibility_hash"])
 
+    def test_advanced_domain_is_typed_verified_and_executed(self):
+        graph = compile_query("Solve 3x + 7 = 25")
+        self.assertEqual(graph.calculator, "advanced")
+        self.assertEqual(graph.nodes[-1].semantic_type, "CalculationResult")
+        report = verify_graph(graph)
+        self.assertTrue(report.valid, report.errors)
+        execution = execute_graph(graph)
+        self.assertEqual(execution["calculation"]["value"], 6)
+        self.assertTrue(execution["receipt"]["verification_summary"]["valid"])
+
 
 if __name__ == "__main__":
     unittest.main()
