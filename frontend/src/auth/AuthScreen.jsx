@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import GoogleSignIn from "./GoogleSignIn";
 
-export default function AuthScreen() {
+export default function AuthScreen({ onBack }) {
   const { login, register, google } = useAuth();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ display_name: "", email: "", password: "" });
@@ -11,8 +11,7 @@ export default function AuthScreen() {
   const [busy, setBusy] = useState(false);
 
   async function run(action) {
-    setBusy(true);
-    setError("");
+    setBusy(true); setError("");
     try { await action(); } catch (requestError) { setError(requestError.message); } finally { setBusy(false); }
   }
 
@@ -22,17 +21,14 @@ export default function AuthScreen() {
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-story">
+    <main className="auth-page auth-page-focused">
+      <section className="auth-story auth-story-compact">
+        <button className="back-to-overview" onClick={onBack} type="button">← Back to project overview</button>
         <div className="brand-lockup"><span>∑</span><strong>OmniCalc</strong><small>CalcGraph</small></div>
-        <span className="eyebrow">AI calculation operating system</span>
-        <h1>Ask naturally.<br />Calculate verifiably.</h1>
-        <p>OmniCalc translates your goal into a typed calculation graph, verifies every dependency, and executes trusted mathematical tools.</p>
-        <div className="auth-feature-grid">
-          <article><strong>Typed graphs</strong><span>Every input and formula has a machine-checkable type.</span></article>
-          <article><strong>Deterministic tools</strong><span>AI plans the work; verified engines calculate the answer.</span></article>
-          <article><strong>Evidence receipts</strong><span>Replay results with formula lineage and reproducibility hashes.</span></article>
-        </div>
+        <span className="eyebrow">Secure calculation workspace</span>
+        <h1>Your calculations.<br />Your evidence.<br />One workspace.</h1>
+        <p>Sign in to preserve calculation history, build reusable workflows and revisit verified CalcGraph receipts.</p>
+        <div className="auth-promise-list"><span>✓ Short-lived JWT access</span><span>✓ Rotating secure refresh sessions</span><span>✓ Server-verified Google identity</span></div>
       </section>
 
       <section className="auth-card">
@@ -42,7 +38,7 @@ export default function AuthScreen() {
         </div>
         <div className="auth-card-copy">
           <h2>{mode === "login" ? "Welcome back" : "Create your workspace"}</h2>
-          <p>{mode === "login" ? "Continue to your calculation history and saved workflows." : "Save, compare, and reproduce verified calculations."}</p>
+          <p>{mode === "login" ? "Continue to your personal home, history and saved workflows." : "Start a private workspace for reproducible calculations."}</p>
         </div>
         <GoogleSignIn disabled={busy} onCredential={(credential) => run(() => google(credential))} />
         <div className="auth-divider"><span>or continue with email</span></div>
@@ -54,7 +50,7 @@ export default function AuthScreen() {
           {error && <div className="auth-error" role="alert">{error}</div>}
           <button className="auth-submit" disabled={busy} type="submit">{busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}</button>
         </form>
-        <p className="auth-security">Short-lived JWT access · Rotating refresh session · Server-verified Google identity</p>
+        <p className="auth-security">Protected account · Personal history · Verified workflows</p>
       </section>
     </main>
   );

@@ -1,2 +1,0 @@
-"""OmniCalc AI backend package."""
-
