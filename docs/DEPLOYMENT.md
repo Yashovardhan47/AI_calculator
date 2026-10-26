@@ -62,6 +62,8 @@ Terminate TLS at a load balancer or reverse proxy and forward the public origin 
 6. Confirm the refresh cookie is `HttpOnly` and `Secure` in browser developer tools.
 7. Run the repository CI commands before each release.
 
+Deployment is ready only when every check above succeeds against the real HTTPS origin. The repository's Google test uses a mocked identity response; a live Google sign-in smoke test is therefore a required release check.
+
 ## Operational controls
 
 - Back up PostgreSQL and test restoration.
@@ -75,3 +77,4 @@ Terminate TLS at a load balancer or reverse proxy and forward the public origin 
 ## Scaling note
 
 Production startup refuses an empty `DATABASE_URL`, so API replicas share users, sessions, history, and workflows. JWT access verification is stateless; refresh rotation is stateful in PostgreSQL. Point every replica at the same database and keep them behind the same HTTPS origin.
+

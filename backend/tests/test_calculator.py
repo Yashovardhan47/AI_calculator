@@ -61,11 +61,14 @@ class CalculatorEngineTests(unittest.TestCase):
     def test_number_theory_and_combinatorics(self):
         self.assertEqual(calculate("factorial of 6")["value"], 720)
         self.assertEqual(calculate("gcd of 48 and 18")["value"], 6)
+        self.assertEqual(calculate("lcm of 0 and 0")["value"], 0)
         self.assertEqual(calculate("combination 10 choose 3")["value"], 120)
 
     def test_bmi_and_degree_trigonometry(self):
         self.assertTrue(math.isclose(calculate("BMI weight 70 kg height 175 cm")["value"], 22.85714286))
         self.assertTrue(math.isclose(calculate("sin 30 degrees")["value"], 0.5, abs_tol=1e-10))
+        with self.assertRaises(CalculationError):
+            calculate("tan 90 degrees")
 
     def test_unit_conversion(self):
         result = calculate("Convert 15 kilometres to miles")
@@ -78,3 +81,4 @@ class CalculatorEngineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

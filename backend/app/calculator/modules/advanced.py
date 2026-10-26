@@ -137,7 +137,8 @@ def calculate(query: str) -> dict:
     match = re.search(r"(?:lcm|least common multiple).*?(\d+)\D+(\d+)", lowered)
     if match:
         a, b = map(int, match.groups())
-        return _result("Least common multiple", float(abs(a * b) // _gcd(a, b)), "lcm(a,b) = |ab| / gcd(a,b)", ["Find the GCD, then divide the absolute product by it."])
+        value = 0 if a == 0 or b == 0 else abs(a * b) // _gcd(a, b)
+        return _result("Least common multiple", float(value), "lcm(a,b) = 0 if either input is 0; otherwise |ab| / gcd(a,b)", ["Handle zero inputs, otherwise divide the absolute product by the GCD."])
     match = re.search(r"(?:combination|ncr|choose)\s*(\d+).*?(?:choose|,|\s)\s*(\d+)\s*$", lowered)
     if match:
         n, r = map(int, match.groups())
@@ -172,6 +173,8 @@ def calculate(query: str) -> dict:
         name, degrees_text = match.groups()
         degrees = float(degrees_text)
         radians = math.radians(degrees)
+        if name == "tan" and abs(math.cos(radians)) < 1e-12:
+            raise ValueError("Tangent is undefined at odd multiples of 90 degrees.")
         function: Callable[[float], float] = getattr(math, name)
         return _result(f"{name}({degrees:g}°)", function(radians), f"{name}(degrees × π/180)", [f"Convert {degrees:g}° to {radians:.8g} radians.", f"Evaluate {name} using the standard library."])
 
@@ -204,3 +207,4 @@ def calculate(query: str) -> dict:
         "I could not map that request to a registered deterministic formula. "
         "Include the operation, numeric values, and units where applicable."
     )
+

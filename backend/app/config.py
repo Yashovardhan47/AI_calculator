@@ -33,6 +33,10 @@ class Settings:
             raise RuntimeError("COOKIE_SAMESITE must be lax, strict, or none.")
         if self.cookie_samesite == "none" and not self.cookie_secure:
             raise RuntimeError("COOKIE_SECURE must be true when COOKIE_SAMESITE is none.")
+        if not 1 <= self.access_token_minutes <= 1_440:
+            raise RuntimeError("ACCESS_TOKEN_MINUTES must be between 1 and 1440.")
+        if not 1 <= self.refresh_token_days <= 365:
+            raise RuntimeError("REFRESH_TOKEN_DAYS must be between 1 and 365.")
         if self.app_env == "production":
             if self.jwt_secret == "development-only-change-this-secret-32-chars":
                 raise RuntimeError("Production requires a unique JWT_SECRET.")
@@ -42,7 +46,12 @@ class Settings:
                 raise RuntimeError("Production requires COOKIE_SECURE=true.")
             if not self.allowed_origins or "*" in self.allowed_origins:
                 raise RuntimeError("Production requires explicit ALLOWED_ORIGINS.")
+            if not self.google_client_id:
+                raise RuntimeError("Production requires GOOGLE_CLIENT_ID.")
+            if any(not origin.startswith("https://") for origin in self.allowed_origins):
+                raise RuntimeError("Production ALLOWED_ORIGINS must use HTTPS.")
 
 
 settings = Settings()
 settings.validate()
+

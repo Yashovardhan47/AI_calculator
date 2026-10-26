@@ -2,7 +2,7 @@
 
 ## Supported version
 
-The `omnicalc-production` branch is the supported deployment line. Research branches may contain experimental interfaces.
+The `main` branch is the supported deployment line. Earlier branches are progressive historical milestones and may not contain later security or deployment fixes.
 
 ## Reporting
 
@@ -15,3 +15,4 @@ OmniCalc must use HTTPS in production. Production mode validates secure cookies,
 ## Sensitive values
 
 Never commit `.env`, database passwords, `JWT_SECRET`, `OPENAI_API_KEY`, raw JWTs, or Google ID tokens. The Google OAuth Web Client ID is public configuration and may appear in frontend output; a Google client secret is not used by this sign-in design.
+

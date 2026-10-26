@@ -53,7 +53,7 @@ function PublicLanding({ onAuthenticate }) {
             <div className="proof-top"><span>LIVE CALCULATION TRACE</span><i>Verifier online</i></div>
             <p className="proof-question">“Standard deviation of 12, 18, 21, 23 and 31”</p>
             <div className="proof-flow"><span>Natural language</span><b>→</b><span>Statistics graph</span><b>→</b><span>Verified result</span></div>
-            <div className="proof-result"><small>Population standard deviation</small><strong>6.1514</strong></div>
+            <div className="proof-result"><small>Population standard deviation</small><strong>6.2290</strong></div>
             <ul><li><span>✓</span> Inputs parsed and typed</li><li><span>✓</span> Formula registered</li><li><span>✓</span> Deterministic execution</li></ul>
             <div className="proof-hash">receipt · cg_87a4…e921</div>
           </div>
@@ -124,7 +124,7 @@ function UserHome({ user, history, workflows, onOpenWorkspace, onRunExample, onL
 
           <section className="home-panel recent-panel">
             <div className="panel-heading"><div><span className="eyebrow">Recent activity</span><h2>Your calculations</h2></div></div>
-            {recent.length ? <div className="home-recent-list">{recent.map((item, index) => <button key={(item.metadata?.history_id || item.query) + index} onClick={() => onRunExample(item.query, item.calculator)} type="button"><span>{item.calculator}</span><strong>{item.query}</strong><small>{String(item.answer?.formatted ?? item.answer?.value ?? "Open result")}</small></button>)}</div> : <div className="home-empty"><span>∑</span><h3>No calculations yet</h3><p>Your verified results will appear here.</p><button onClick={onOpenWorkspace} type="button">Run your first calculation</button></div>}
+            {recent.length ? <div className="home-recent-list">{recent.map((item, index) => <button key={(item.metadata?.history_id || item.query) + index} onClick={() => onRunExample(item.query, item.calculator)} type="button"><span>{item.calculator}</span><strong>{item.query}</strong><small>{typeof item.answer === "string" ? item.answer : String(item.value ?? "Open result")}</small></button>)}</div> : <div className="home-empty"><span>∑</span><h3>No calculations yet</h3><p>Your verified results will appear here.</p><button onClick={onOpenWorkspace} type="button">Run your first calculation</button></div>}
           </section>
         </div>
 
@@ -234,3 +234,4 @@ export default function App() {
     </div>
   );
 }
+

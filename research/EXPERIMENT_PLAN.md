@@ -28,9 +28,10 @@
 
 - Benchmark cases are small and curated.
 - Compiler rules share assumptions with the deterministic calculators.
-- Current graphs contain a single operation; multi-operation planning needs a later benchmark.
+- Most registered domains currently compile to one operation. Finance includes a multi-operation graph, but broader multi-step planning still needs a larger benchmark.
 - Fingerprints establish content identity, not external truth or regulatory suitability.
 
 ## Publication path
 
 Freeze formula versions, expand benchmark generation, add independent reference implementations, report every failed case, and publish the IR schema plus benchmark under a stable release tag before making broader research claims.
+

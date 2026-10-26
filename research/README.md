@@ -13,7 +13,7 @@ The contribution is not a claim that all mathematical domains are solved. Its no
 ## Implemented artifacts
 
 - `backend/app/calcgraph/models.py`: versioned graph, node, constraint, and fingerprint model.
-- `backend/app/calcgraph/compiler.py`: goal-to-graph compilers for arithmetic, dates, EMI, statistics, and units.
+- `backend/app/calcgraph/compiler.py`: goal-to-graph compilers for arithmetic, dates, EMI, statistics, units, and advanced registered formulas.
 - `backend/app/calcgraph/verifier.py`: allowlist, type, edge, unit-dimension, finite-value, output, and DAG checks.
 - `backend/app/calcgraph/executor.py`: deterministic graph execution and evidence receipts.
 - `backend/app/calcgraph/formulas.py`: versioned formula provenance registry.
@@ -32,7 +32,8 @@ backend/.venv/bin/python research/run_benchmark.py
 
 ## Boundaries
 
-- The reference compiler handles the five domain packs registered in this branch.
+- The reference compiler handles the six registered calculator packs, including an advanced pack for algebra, geometry, finance, combinatorics, health, physics, and trigonometry.
 - It uses rules, not a general theorem prover or symbolic algebra system.
 - A hash proves identical serialized inputs and outputs; it does not prove that a formula is scientifically appropriate for every context.
-- External live data, authentication, graph persistence, and independent replication remain future experimental work.
+- External live data, durable graph persistence, independent replication, and broader adversarial evaluation remain future experimental work. Authentication and account-scoped history are implemented application features, not part of the current research claim.
+
