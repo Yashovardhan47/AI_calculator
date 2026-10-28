@@ -10,7 +10,7 @@
     "version": {"const": "0.2.0"},
     "type_system_version": {"const": "0.2.0"},
     "goal": {"type": "string", "minLength": 1},
-    "calculator": {"enum": ["arithmetic", "age", "emi", "statistics", "units"]},
+    "calculator": {"enum": ["arithmetic", "age", "emi", "statistics", "units", "advanced"]},
     "status": {"enum": ["compiled", "verified", "executed", "rejected"]},
     "created_at": {"type": "string", "format": "date-time"},
     "nodes": {
