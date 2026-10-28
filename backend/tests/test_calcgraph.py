@@ -3,6 +3,7 @@ import unittest
 
 from app.calcgraph import (
     ClarificationNeeded,
+    analyze_graph,
     GraphVerificationError,
     compile_query,
     execute_graph,
@@ -130,6 +131,43 @@ class CalcGraphTests(unittest.TestCase):
         execution = execute_graph(graph)
         self.assertEqual(execution["calculation"]["value"], 6)
         self.assertTrue(execution["receipt"]["verification_summary"]["valid"])
+
+    def test_analysis_returns_uncertainty_sensitivity_and_counterfactual_evidence(self):
+        graph = compile_query("EMI for INR 1000000 at 8.5% for 5 years")
+        analysis = analyze_graph(
+            graph,
+            uncertainties={
+                "principal": {"relative_percent": 5},
+                "annual_rate": {"absolute": 0.5},
+            },
+            scenarios=[
+                {
+                    "name": "higher-rate",
+                    "overrides": {"annual_rate": 10.0},
+                }
+            ],
+        )
+        interval = analysis["uncertainty_intervals"]["emi"]
+        self.assertLess(interval["lower"], interval["baseline"])
+        self.assertGreater(interval["upper"], interval["baseline"])
+        self.assertIn("annual_rate", analysis["sensitivity"])
+        self.assertGreater(
+            analysis["counterfactuals"][0]["delta_from_baseline"]["emi"],
+            0,
+        )
+        self.assertEqual(len(analysis["analysis_digest"]), 64)
+        self.assertEqual(analysis["method"]["corner_samples"], 4)
+
+    def test_analysis_rejects_non_numeric_uncertainty_target(self):
+        graph = compile_query("Calculate 2 + 2")
+        with self.assertRaises(ValueError):
+            analyze_graph(graph, uncertainties={"expression": {"absolute": 1}})
+
+    def test_analysis_digest_is_reproducible(self):
+        graph = compile_query("EMI for INR 1000000 at 8.5% for 5 years")
+        first = analyze_graph(graph, uncertainties={"annual_rate": {"absolute": 0.25}})
+        second = analyze_graph(graph, uncertainties={"annual_rate": {"absolute": 0.25}})
+        self.assertEqual(first["analysis_digest"], second["analysis_digest"])
 
 
 if __name__ == "__main__":
