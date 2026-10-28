@@ -88,3 +88,8 @@ Read [Authentication](docs/AUTHENTICATION.md) and [Deployment](docs/DEPLOYMENT.m
 - Arbitrary Python or AI-generated code is never evaluated by the calculation engine.
 
 Never commit `.env` or real credentials. See [API keys and secrets](api_keys/README.md) and [Security](SECURITY.md).
+
+
+## Research validity and limitations
+
+CalcGraph includes typed verification, reproducibility receipts, deterministic uncertainty intervals, local sensitivity, and counterfactual analysis. These features do not make OmniCalc a universal calculator or professional-advice system. Read [the complete limitations](docs/LIMITATIONS.md) and [the novelty and experiment plan](research/NOVELTY.md) before deployment or publication.
