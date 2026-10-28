@@ -80,6 +80,18 @@ export function calculate(query, calculator) {
   });
 }
 
+export function analyzeCalcGraph(graph, options = {}) {
+  return request("/api/v1/calcgraph/analyze", {
+    method: "POST",
+    body: JSON.stringify({
+      graph,
+      uncertainties: options.uncertainties || {},
+      scenarios: options.scenarios || [],
+      sensitivity_fraction: options.sensitivityFraction || 0.01,
+    }),
+  });
+}
+
 export function getHistory() { return request("/api/v1/history?limit=50"); }
 export function clearRemoteHistory() { return request("/api/v1/history", { method: "DELETE" }); }
 
