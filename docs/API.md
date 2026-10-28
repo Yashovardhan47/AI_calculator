@@ -117,6 +117,28 @@ Returns `valid`, every pass/fail check, the topological execution order, and err
 
 Accepts `{"graph": {...}}`. The graph must pass static verification. A successful response contains `calculation`, `calcgraph`, `verification`, and `receipt`. Unknown operations, invalid types, dangling edges, cycles, non-finite values, dimension mismatches, and missing outputs return HTTP `422` before calculator dispatch.
 
+## Analyze uncertainty, sensitivity, and counterfactuals
+
+`POST /calcgraph/analyze`
+
+The submitted graph must already be valid and must have scalar numeric inputs and outputs for this analysis version.
+
+```json
+{
+  "graph": {"version": "0.2.0", "goal": "...", "nodes": []},
+  "uncertainties": {
+    "principal": {"relative_percent": 5},
+    "annual_rate": {"absolute": 0.5}
+  },
+  "scenarios": [
+    {"name": "higher-rate", "overrides": {"annual_rate": 10.0}}
+  ],
+  "sensitivity_fraction": 0.01
+}
+```
+
+The response contains baseline outputs, uncertainty intervals, local partial derivatives, normalized elasticities, counterfactual deltas, method metadata, explicit limitations, the baseline receipt, and a deterministic `analysis_digest`. Uncertainty accepts exactly one of `absolute` or `relative_percent` per input. Work is bounded to eight uncertain inputs and twenty scenarios.
+
 ## Evidence semantics
 
 - `graph_fingerprint`: SHA-256 of canonical semantic graph content.
