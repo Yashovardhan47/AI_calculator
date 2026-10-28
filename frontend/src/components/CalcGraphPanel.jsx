@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { analyzeCalcGraph } from "../api";
+
 
 function shortHash(value) {
   if (!value) return "Unavailable";
@@ -9,8 +11,24 @@ function shortHash(value) {
 
 export default function CalcGraphPanel({ graph, verification, receipt }) {
   const [open, setOpen] = useState(true);
+  const [analysis, setAnalysis] = useState(null);
+  const [analysisError, setAnalysisError] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
 
   if (!graph || !verification || !receipt) return null;
+
+  async function runAnalysis() {
+    setAnalyzing(true);
+    setAnalysisError("");
+    try {
+      setAnalysis(await analyzeCalcGraph(graph));
+    } catch (error) {
+      setAnalysis(null);
+      setAnalysisError(error.message);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
 
   function downloadReceipt() {
     const payload = JSON.stringify({ calcgraph: graph, verification, receipt }, null, 2);
@@ -82,7 +100,33 @@ export default function CalcGraphPanel({ graph, verification, receipt }) {
             </ul>
           </details>
 
-          <button className="receipt-download" type="button" onClick={downloadReceipt}>Download evidence receipt</button>
+          <div className="analysis-actions">
+            <button className="receipt-download" type="button" onClick={runAnalysis} disabled={analyzing}>
+              {analyzing ? "Analyzing…" : "Run sensitivity analysis"}
+            </button>
+            <button className="receipt-download" type="button" onClick={downloadReceipt}>Download evidence receipt</button>
+          </div>
+
+          {analysisError && <p className="analysis-error">{analysisError}</p>}
+          {analysis && (
+            <details className="check-list" open>
+              <summary>Research analysis · {shortHash(analysis.analysis_digest)}</summary>
+              <ul>
+                {Object.entries(analysis.sensitivity).map(([inputId, item]) => (
+                  <li key={inputId}>
+                    <span className="pass">↗</span>
+                    <code>{inputId}</code>
+                    <p>
+                      {Object.entries(item.normalized_elasticity).map(([outputId, value]) =>
+                        `${outputId}: ${value == null ? "undefined at zero output" : value.toFixed(4)} elasticity`
+                      ).join(" · ")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <p className="analysis-note">Local central-difference analysis; inspect the API evidence for method limitations.</p>
+            </details>
+          )}
         </div>
       )}
     </section>
