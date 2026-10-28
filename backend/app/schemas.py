@@ -34,6 +34,13 @@ class CalcGraphPayload(BaseModel):
     graph: dict[str, Any]
 
 
+class CalcGraphAnalysisPayload(BaseModel):
+    graph: dict[str, Any]
+    uncertainties: dict[str, dict[str, float]] = Field(default_factory=dict)
+    scenarios: list[dict[str, Any]] = Field(default_factory=list, max_length=20)
+    sensitivity_fraction: float = Field(default=0.01, gt=0, le=0.25)
+
+
 class CalculatorInfo(BaseModel):
     id: str
     name: str
