@@ -16,6 +16,7 @@ The contribution is not a claim that all mathematical domains are solved. Its no
 - `backend/app/calcgraph/compiler.py`: goal-to-graph compilers for arithmetic, dates, EMI, statistics, units, and advanced registered formulas.
 - `backend/app/calcgraph/verifier.py`: allowlist, type, edge, unit-dimension, finite-value, output, and DAG checks.
 - `backend/app/calcgraph/executor.py`: deterministic graph execution and evidence receipts.
+- `backend/app/calcgraph/analysis.py`: bounded uncertainty, local sensitivity, counterfactual execution, and analysis evidence digests.
 - `backend/app/calcgraph/formulas.py`: versioned formula provenance registry.
 - `calcgraph.schema.json`: portable JSON Schema for the versioned IR envelope.
 - `benchmark/sample_cases.json`: reproducible cross-domain and failure-mode benchmark.
@@ -36,4 +37,5 @@ backend/.venv/bin/python research/run_benchmark.py
 - It uses rules, not a general theorem prover or symbolic algebra system.
 - A hash proves identical serialized inputs and outputs; it does not prove that a formula is scientifically appropriate for every context.
 - External live data, durable graph persistence, independent replication, and broader adversarial evaluation remain future experimental work. Authentication and account-scoped history are implemented application features, not part of the current research claim.
+- The uncertainty method is deterministic corner enumeration, not a probabilistic or formal global-bound solver. See `docs/LIMITATIONS.md` and `research/NOVELTY.md` before making research claims.
 
