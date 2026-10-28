@@ -435,3 +435,26 @@ button { color: inherit; }
   .workspace-back { margin-left: auto; }
   .topbar-status { display: none; }
 }
+
+
+.analysis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.analysis-actions .receipt-download:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.analysis-error,
+.analysis-note {
+  margin: 0.75rem 0 0;
+  color: var(--muted, #667085);
+  font-size: 0.84rem;
+}
+
+.analysis-error {
+  color: #b42318;
+}
