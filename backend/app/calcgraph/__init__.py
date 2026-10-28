@@ -1,3 +1,4 @@
+from .analysis import analyze_graph
 from .compiler import ClarificationNeeded, compile_query
 from .executor import execute_graph
 from .models import CalcGraph, CalcNode
@@ -11,6 +12,7 @@ __all__ = [
     "GraphVerificationError",
     "TYPE_REGISTRY",
     "TYPE_SYSTEM_VERSION",
+    "analyze_graph",
     "compile_query",
     "execute_graph",
     "verify_graph",
