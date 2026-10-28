@@ -9,6 +9,7 @@ from .auth.dependencies import optional_user
 from .auth.router import router as auth_router
 from .calcgraph import (
     CalcGraph,
+    analyze_graph,
     ClarificationNeeded,
     GraphVerificationError,
     compile_query,
@@ -18,7 +19,7 @@ from .calcgraph import (
 )
 from .calcgraph.service import calculate_with_graph
 from .config import settings
-from .schemas import CalcGraphPayload, CalculationRequest, CalculationResult, CalculatorInfo
+from .schemas import CalcGraphAnalysisPayload, CalcGraphPayload, CalculationRequest, CalculationResult, CalculatorInfo
 from .routers.workspace import router as workspace_router
 from .services.ai_router import route_with_openai
 from .storage import get_store
@@ -117,6 +118,20 @@ def verify_calcgraph(payload: CalcGraphPayload) -> dict:
         return verify_graph(graph).to_dict()
     except (TypeError, KeyError, ValueError) as exc:
         raise _calculation_error(exc) from exc
+
+
+@app.post("/api/v1/calcgraph/analyze")
+def analyze_calcgraph(payload: CalcGraphAnalysisPayload) -> dict:
+    try:
+        graph = CalcGraph.from_dict(payload.graph)
+        return analyze_graph(
+            graph,
+            uncertainties=payload.uncertainties,
+            scenarios=payload.scenarios,
+            sensitivity_fraction=payload.sensitivity_fraction,
+        )
+    except (GraphVerificationError, SyntaxError, TypeError, KeyError, ValueError, ZeroDivisionError, OverflowError) as exc:
+        raise _calculation_error(exc, getattr(graph, "calculator", None) if "graph" in locals() else None) from exc
 
 
 @app.post("/api/v1/calcgraph/execute")
